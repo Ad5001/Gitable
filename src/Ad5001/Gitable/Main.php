@@ -16,6 +16,9 @@ use pocketmine\event\Listener;
 use pocketmine\plugin\PluginBase;
 
 
+use pocketmine\utils\TextFormat as C;
+
+
 use pocketmine\Server;
 
 
@@ -30,6 +33,8 @@ use pocketmine\Player;
 
 class Main extends PluginBase implements Listener {
     protected $git;
+
+    const PREFIX = C::BLACK . "[" . C::LIGHT_GRAY . "Git" . C::BLACK . "] " . C::LIGHT_GRAY;
 
 
     public function onEnable() {
@@ -58,17 +63,16 @@ class Main extends PluginBase implements Listener {
 
             case 'git':
 
-            if(count($args) >= 1) {
+            if(count($args) >= 2) {
 
-                if(isset(self::COMMANDS[$args[0]])) {
+                switch($args[0]) {
 
-                    $cmd = $args[0];
-
-                    unset($args[0]);
-
-                    $sender->sendMessage($this->git->{self::COMMANDS[$cmd][0]}(implode(" ", $args)));
-
+                    case "cd":
+                    $this->git->cd($args[1]);
+                    $sender->sendMessage("New path: " . $this->git->getDir());
+                    break;
                 }
+                return true;
             }
 
 

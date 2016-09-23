@@ -4,6 +4,12 @@ author:  Ad5001
 version: 1.0
 api: [2.0.0]
 main: Ad5001\Gitable\Main
-commands: []
-permissions: []
+commands:
+ git:
+  description: "Main Gitable command"
+  usage: "/git <command> <parameters>"
+  permission: git.command.git
+permissions:
+ git.command.git:
+  default: op
 ...
