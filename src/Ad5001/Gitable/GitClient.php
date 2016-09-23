@@ -82,7 +82,7 @@ abstract class GitClient {
     public abstract function add($path) : string;
 
 
-    public abstract function diff($path) : string;
+    public abstract function diff() : string;
 
 
     public abstract function status($path) : string;

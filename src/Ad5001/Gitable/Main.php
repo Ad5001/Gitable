@@ -34,7 +34,7 @@ use pocketmine\Player;
 class Main extends PluginBase implements Listener {
     protected $git;
 
-    const PREFIX = C::BLACK . "[" . C::LIGHT_GRAY . "Git" . C::BLACK . "] " . C::LIGHT_GRAY;
+    const PREFIX = C::BLACK .C::BOLD . C::ITALIC . "[" . C::RESET . C::BOLD .C::GRAY . "Git" . C::BLACK . C::ITALIC . "] " . C::RESET . C::GRAY;
 
 
     public function onEnable() {
@@ -69,7 +69,25 @@ class Main extends PluginBase implements Listener {
 
                     case "cd":
                     $this->git->cd($args[1]);
-                    $sender->sendMessage("New path: " . $this->git->getDir());
+                    $sender->sendMessage(self::PREFIX . "New path: " . $this->git->getDir());
+                    break;
+
+                    case "commit":
+                    unset($args[0]);
+                    $sender->sendMessage(self::PREFIX . $this->git->commit(implode(" ", $args)));
+                    $sender->sendMessage(self::PREFIX . "Commited !");
+                    break;
+
+                    case "checkout":
+                    $sender->sendMessage(self::PREFIX . $this->git->checkout($args[1]));
+                    break;
+
+                    case "dir":
+                    $sender->sendMessage(self::PREFIX . $this->git->getDir());
+                    break;
+
+                    case "clone":
+                    $sender->sendMessage(self::PREFIX . $this->git->clone($args[1]));
                     break;
                 }
                 return true;
