@@ -33,6 +33,8 @@ abstract class GitClient {
 
         $this->dir = $dir;
 
+        $this->cd($dir);
+
 
     }
 
@@ -43,13 +45,13 @@ abstract class GitClient {
     public abstract function push(string $to = "github", string $from = "master") : string;
 
 
-    public abstract function undoCommit() : string;
+    public abstract function checkout($branch = null) : string;
 
 
-    public abstract function checkout($message) : string;
+    public abstract function getBranch() : string;
 
 
-    public abstract function branch($message) : string;
+    public abstract function branch($branch = '') : string;
 
 
     public abstract function start() : string;
@@ -68,16 +70,13 @@ abstract class GitClient {
     public abstract function clone($from) : string;
 
 
-    public abstract function logs() : string;
+    public abstract function log() : string;
 
 
     public abstract function remove($path) : string;
 
 
-    public abstract function move($path) : string;
-
-
-    public abstract function headreset() : string;
+    public abstract function move($path, $newpath) : string;
 
 
     public abstract function add($path) : string;
@@ -93,9 +92,6 @@ abstract class GitClient {
 
 
     public abstract function pull($to = "github", $from = "master") : string;
-
-
-    public abstract function status($path) : string;
 
 
 }

@@ -38,11 +38,11 @@ class Main extends PluginBase implements Listener {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         if(Utils::getOS() == "win") {
-            $this->git = new Windows($this);
+            $this->git = new Windows($this, $this->getDataFolder());
         } elseif(Utils::getOS() == "linux") {
-            $this->git = new Linux($this);
+            $this->git = new Linux($this, $this->getDataFolder());
         } elseif(Utils::getOS() == "mac") {
-            $this->git = new Mac($this);
+            $this->git = new Mac($this, $this->getDataFolder());
         }
 
     }
