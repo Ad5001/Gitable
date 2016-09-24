@@ -39,15 +39,34 @@ class Main extends PluginBase implements Listener {
 
     public function onEnable() {
 
+        @mkdir($this->getDataFolder());
+
+        @mkdir($this->getDataFolder() . "bin");
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        $zip = new ZipArchive();
 
         if(Utils::getOS() == "win") {
+            if(!file_exists($this->getDataFolder() . "bin/git.exe") && $zip->open("../../resources/Windows.zip")) {
+                $zip->extractTo($this->getDataFolder() . "bin");
+                $zip->close();
+            }
             $this->git = new Windows($this, $this->getDataFolder());
         } elseif(Utils::getOS() == "linux") {
+            if(!file_exists($this->getDataFolder() . "bin/git.exe") && $zip->open("../../resources/Linux.zip")) {
+                $zip->extractTo($this->getDataFolder() . "bin");
+                $zip->close();
+            }
             $this->git = new Linux($this, $this->getDataFolder());
         } elseif(Utils::getOS() == "mac") {
+            if(!file_exists($this->getDataFolder() . "bin/git.exe") && $zip->open("../../resources/Mac.zip")) {
+                $zip->extractTo($this->getDataFolder() . "bin");
+                $zip->close();
+            }
             $this->git = new Mac($this, $this->getDataFolder());
+        } else {
+            $this->getLogger()->critical("Unsuported device ! Please refer to the download page to see the list of available devices.");
+            $this->setEnable(false);
         }
 
     }
