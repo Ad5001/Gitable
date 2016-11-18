@@ -10,7 +10,7 @@ use pocketmine\Server;
 
 use pocketmine\Player;
 
-
+define("DEFAULT_GIT_DIR", \pocketmine\Server::getInstance()->getFilePath(), true);
 
 abstract class GitClient {
 
@@ -35,63 +35,27 @@ abstract class GitClient {
 
         $this->cd($dir);
 
+        $this->initcheck();
+
 
     }
 
 
-    public abstract function commit(string $message) : string;
+    public abstract function gitExec(string $args) : string;
 
-
-    public abstract function push(string $to = "github", string $from = "master") : string;
-
-
-    public abstract function checkout($branch = null) : string;
-
-
-    public abstract function getBranch() : string;
-
-
-    public abstract function branch($branch = '') : string;
-
-
-    public abstract function start() : string;
-
-
-    public abstract function init() : string;
-
-    public function getDir() {
+    public function pwd() : string {
         return $this->dir;
     }
 
 
-    public abstract function cd($path) : string;
+    public abstract function cd(string $path) : string;
 
+    /*
+    Return the list of files in directory.
+    */
+    public abstract function ls() : string;
 
-    public abstract function clone($from) : string;
-
-
-    public abstract function log() : string;
-
-
-    public abstract function remove($path) : string;
-
-
-    public abstract function move($path, $newpath) : string;
-
-
-    public abstract function add($path) : string;
-
-
-    public abstract function diff() : string;
-
-
-    public abstract function status($path) : string;
-
-
-    public abstract function remote($name, $url) : string;
-
-
-    public abstract function pull($to = "github", $from = "master") : string;
+    public abstract function initcheck();
 
 
 }

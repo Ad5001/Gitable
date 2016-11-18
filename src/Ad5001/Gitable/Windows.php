@@ -23,120 +23,153 @@ use Ad5001\Gitable\Main;
 class Windows extends GitClient {
 	
 	
-	
-	
-	
-	public function commit(string $message) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe commit -m \"$message\"", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function push(string $to ="github", string $from = "master") : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe push $to $from", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function checkout($branch = null) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe checkout " . (!is_null($branch) ? $this->getBranch() : $branch), 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public function getBranch() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe branch", 'r');
-		$read = fread($handle, 2096);
-		return explode(" ", $read)[1];
-	}
-	
-	
-	public  function branch($branch = '') : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe branch " . $branch, 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function start() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe init", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function init() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe init", 'r');
-		return fread($handle, 2096);
-	}
-	
-	public function getDir() {
-		return $this->dir;
-	}
-	
-	
-	public  function cd($path) : string {
-		if(is_dir($path)) {
-			$dir = chdir($path);
-			$this->dir = getcwd();
-			return (string) $dir;
+	/*
+	Exec's a git request with defined args
+	@param     $args    string
+	*/
+	public function gitExec(string $args) : string {
+		proc_open(
+		    "cd " . $this->dir,
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $a
+		  );
+		$process = proc_open(
+		    "git " . $args,
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $pipes
+		  );
+		  proc_open(
+		    "cd " . DEFAULT_GIT_DIR,
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $a
+		  );
+		if ($process !== false) {
+			$stdout = stream_get_contents($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[1]);
+			fclose($pipes[2]);
+			proc_close($process);
+			
+			return (string) $stdout;
 		} else {
-            return "Directory $path not found !";
-        }
+			$stdout = stream_get_contents($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[1]);
+			fclose($pipes[2]);
+			return "Error while executing command "."git " . $args . ": $stderr";
+		}
 	}
-	
-	
-	public  function clone($from) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe clone $from", 'r');
-		return fread($handle, 2096);
+
+
+	/*
+	Changes current directory
+	@param     $path    string
+	*/
+	public function cd(string $path): string {
+		if(is_dir($this->dir . $path)) {
+			$this->dir .= $path;
+			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
+				$this->dir .= "/";
+			}
+			return "§aPath set to $this->dir";
+		} elseif(is_dir($path)) {
+			$this->dir = $path;
+			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
+				$this->dir .= "/";
+			}
+			return "§aPath set to $path";
+		} else {
+			return "§4Directory $path not found !";
+		}
 	}
-	
-	
-	public  function log() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe log", 'r');
-		return fread($handle, 2096);
+
+
+	/*
+	Return all files and dirs from the current directory
+	*/
+	public function ls() : string {
+		proc_open(
+		    "cd " . $this->dir,
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $a
+		);
+		$whereIsCommand = (PHP_OS == 'WINNT') ? 'dir' : 'ls';
+		
+		$process = proc_open(
+		    "$whereIsCommand $command",
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $pipes
+		  );
+		  proc_open(
+		    "cd " . DEFAULT_GIT_DIR,
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $a
+		  );
+		if ($process !== false) {
+			$stdout = stream_get_contents($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[1]);
+			fclose($pipes[2]);
+			proc_close($process);
+			
+			return $stdout;
+		}
 	}
-	
-	
-	public  function remove($path) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe rm $path", 'r');
-		return fread($handle, 2096);
+
+
+	/*
+	Checks if the executable exists.
+	*/
+	public function initcheck() {
+		$this->executable = $this->main->getConfig()->get("executable_path");
+		$process = proc_open(
+		    '"$this->executable"'." --version",
+		    array(
+		      0 => array("pipe", "r"), //S		TDIN
+		      1 => array("pipe", "w"), //S		TDOUT
+		      2 => array("pipe", "w"), //S		TDERR
+		    ),
+		    $pipes
+		  );
+		if ($process !== false) {
+			$stdout = stream_get_contents($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[1]);
+			fclose($pipes[2]);
+			proc_close($process);
+			
+			if(strpos($stdout, "git version") == false) {
+				$this->main->getLogger()->critical("Executable wasn't found at path $this->executable. Be sure that you installed git and that the path in the config is the executable path.");
+				$this->main->setEnabled(false);
+			}
+		}
 	}
-	
-	
-	public  function move($path, $newpath) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe mv $path $newpath", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function add($path) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe add $path", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function diff() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe diff $path", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function status() : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe status -s", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function remote($name, $url) : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe remote $name $url", 'r');
-		return fread($handle, 2096);
-	}
-	
-	
-	public  function pull($to = "github", $from = "master") : string {
-		$handle = popen($this->getDataFolder() . "bin/git.exe pull $to $from", 'r');
-		return fread($handle, 2096);
-	}
-	
+
+
 	
 	
 	
