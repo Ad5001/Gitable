@@ -29,8 +29,9 @@ class Windows extends GitClient {
 	*/
 	public function gitExec(string $args) : string {
 		chdir($this->dir);
+		echo "$this->executable " . $args . "  ";
 		$process = proc_open(
-		    "\"$this->executable\" " . $args,
+		    "$this->executable " . $args,
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
@@ -116,7 +117,7 @@ class Windows extends GitClient {
 	public function initcheck() {
 		$this->executable = $this->main->getConfig()->get("executable_path");
 		$process = proc_open(
-		    "\"$this->executable\" --version",
+		    "$this->executable --version",
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT

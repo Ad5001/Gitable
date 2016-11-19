@@ -1,4 +1,4 @@
 # Welcome to windows Gitable's config !
 # Select here the path of the git executable (if you did
 # not modify it while installing git, it should work.)
-executable_path: "C:\\Program Files\\Git\\bin\\git.exe"
+executable_path: "C:\\PROGRA~1\\Git\\bin\\git.exe"
