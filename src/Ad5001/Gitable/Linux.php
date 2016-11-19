@@ -114,7 +114,6 @@ class Linux extends GitClient {
 	Checks if the executable exists.
 	*/
 	public function initcheck() {
-		$this->executable = $this->main->getConfig()->get("executable_path");
 		$process = proc_open(
 		    "git --version",
 		    array(
