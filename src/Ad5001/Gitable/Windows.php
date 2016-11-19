@@ -29,7 +29,6 @@ class Windows extends GitClient {
 	*/
 	public function gitExec(string $args) : string {
 		chdir($this->dir);
-		echo "$this->executable " . $args . "  ";
 		$process = proc_open(
 		    "$this->executable " . $args,
 		    array(
