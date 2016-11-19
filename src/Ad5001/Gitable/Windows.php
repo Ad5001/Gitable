@@ -28,17 +28,9 @@ class Windows extends GitClient {
 	@param     $args    string
 	*/
 	public function gitExec(string $args) : string {
-		proc_open(
-		    "cd " . $this->dir,
-		    array(
-		      0 => array("pipe", "r"), //S		TDIN
-		      1 => array("pipe", "w"), //S		TDOUT
-		      2 => array("pipe", "w"), //S		TDERR
-		    ),
-		    $a
-		  );
+		chdir($this->dir);
 		$process = proc_open(
-		    "git " . $args,
+		    "\"$this->executable\" " . $args,
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
@@ -46,15 +38,7 @@ class Windows extends GitClient {
 		    ),
 		    $pipes
 		  );
-		  proc_open(
-		    "cd " . DEFAULT_GIT_DIR,
-		    array(
-		      0 => array("pipe", "r"), //S		TDIN
-		      1 => array("pipe", "w"), //S		TDOUT
-		      2 => array("pipe", "w"), //S		TDERR
-		    ),
-		    $a
-		  );
+		  chdir(DEFAULT_GIT_DIR);
 		if ($process !== false) {
 			$stdout = stream_get_contents($pipes[1]);
 			$stderr = stream_get_contents($pipes[2]);
@@ -62,13 +46,13 @@ class Windows extends GitClient {
 			fclose($pipes[2]);
 			proc_close($process);
 			
-			return (string) $stdout;
+			return $stdout . $stderr;
 		} else {
 			$stdout = stream_get_contents($pipes[1]);
 			$stderr = stream_get_contents($pipes[2]);
 			fclose($pipes[1]);
 			fclose($pipes[2]);
-			return "Error while executing command "."git " . $args . ": $stderr";
+			return "Error while executing command git " . $args . ": $stderr";
 		}
 	}
 
@@ -79,17 +63,18 @@ class Windows extends GitClient {
 	*/
 	public function cd(string $path): string {
 		if(is_dir($this->dir . $path)) {
-			$this->dir .= $path;
+			$this->dir = $this->dir . $path;
+			$this->dir = realpath($this->dir);
 			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
 				$this->dir .= "/";
 			}
 			return "§aPath set to $this->dir";
 		} elseif(is_dir($path)) {
 			$this->dir = $path;
+			$this->dir = realpath($this->dir);
 			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
 				$this->dir .= "/";
-			}
-			return "§aPath set to $path";
+			}return"§aPath set to $path";
 		} else {
 			return "§4Directory $path not found !";
 		}
@@ -100,44 +85,28 @@ class Windows extends GitClient {
 	Return all files and dirs from the current directory
 	*/
 	public function ls() : string {
-		proc_open(
-		    "cd " . $this->dir,
-		    array(
-		      0 => array("pipe", "r"), //S		TDIN
-		      1 => array("pipe", "w"), //S		TDOUT
-		      2 => array("pipe", "w"), //S		TDERR
-		    ),
-		    $a
-		);
+		chdir($this->dir);
 		$whereIsCommand = (PHP_OS == 'WINNT') ? 'dir' : 'ls';
 		
 		$process = proc_open(
-		    "$whereIsCommand $command",
+		    "$whereIsCommand",
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
 		      2 => array("pipe", "w"), //S		TDERR
 		    ),
-		    $pipes
+		    $p
 		  );
-		  proc_open(
-		    "cd " . DEFAULT_GIT_DIR,
-		    array(
-		      0 => array("pipe", "r"), //S		TDIN
-		      1 => array("pipe", "w"), //S		TDOUT
-		      2 => array("pipe", "w"), //S		TDERR
-		    ),
-		    $a
-		  );
+		  chdir(DEFAULT_GIT_DIR);
 		if ($process !== false) {
-			$stdout = stream_get_contents($pipes[1]);
-			$stderr = stream_get_contents($pipes[2]);
-			fclose($pipes[1]);
-			fclose($pipes[2]);
+			$stdout = stream_get_contents($p[1]);
+			$stderr = stream_get_contents($p[2]);
+			fclose($p[1]);
+			fclose($p[2]);
 			proc_close($process);
 			
-			return $stdout;
 		}
+			return $stdout;
 	}
 
 
@@ -147,7 +116,7 @@ class Windows extends GitClient {
 	public function initcheck() {
 		$this->executable = $this->main->getConfig()->get("executable_path");
 		$process = proc_open(
-		    '"$this->executable"'." --version",
+		    "\"$this->executable\" --version",
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
@@ -162,9 +131,12 @@ class Windows extends GitClient {
 			fclose($pipes[2]);
 			proc_close($process);
 			
-			if(strpos($stdout, "git version") == false) {
+			if($stdout == '') {
+				$this->main->getLogger()->info("Git error: $stderr");
 				$this->main->getLogger()->critical("Executable wasn't found at path $this->executable. Be sure that you installed git and that the path in the config is the executable path.");
 				$this->main->setEnabled(false);
+			} else {
+				$this->main->getLogger()->info("Loaded git: $stdout");
 			}
 		}
 	}

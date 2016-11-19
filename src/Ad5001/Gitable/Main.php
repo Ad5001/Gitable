@@ -78,7 +78,7 @@ class Main extends PluginBase implements Listener {
 			
 			case 'git':
 			
-			if(count($args) >= 2) {
+			if(count($args) >= 1) {
 				
 				switch($args[0]) {
 					
