@@ -30,7 +30,7 @@ class Linux extends GitClient {
 	public function gitExec(string $args) : string {
 		chdir($this->dir);
 		$process = proc_open(
-		    "git " . $args,
+		    "cd $this->dir\ngit " . $args, // Temporary working solution.
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
@@ -38,7 +38,6 @@ class Linux extends GitClient {
 		    ),
 		    $pipes
 		  );
-		  chdir(DEFAULT_GIT_DIR);
 		if ($process !== false) {
 			$stdout = stream_get_contents($pipes[1]);
 			$stderr = stream_get_contents($pipes[2]);
@@ -46,12 +45,14 @@ class Linux extends GitClient {
 			fclose($pipes[2]);
 			proc_close($process);
 			
+            chdir(DEFAULT_GIT_DIR);
 			return $stdout . $stderr;
 		} else {
 			$stdout = stream_get_contents($pipes[1]);
 			$stderr = stream_get_contents($pipes[2]);
 			fclose($pipes[1]);
 			fclose($pipes[2]);
+            chdir(DEFAULT_GIT_DIR);
 			return "Error while executing command git " . $args . ": $stderr";
 		}
 	}
@@ -62,19 +63,17 @@ class Linux extends GitClient {
 	@param     $path    string
 	*/
 	public function cd(string $path): string {
+        if(substr($this->dir, strlen($this->dir) - 2) !== "/") {
+			$this->dir .= "/";
+        }
 		if(is_dir($this->dir . $path)) {
 			$this->dir = $this->dir . $path;
 			$this->dir = realpath($this->dir);
-			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
-				$this->dir .= "/";
-			}
 			return "§aPath set to $this->dir";
 		} elseif(is_dir($path)) {
 			$this->dir = $path;
 			$this->dir = realpath($this->dir);
-			if(substr($this->dir, strlen($this->dir) - 1) !== "/") {
-				$this->dir .= "/";
-			}return"§aPath set to $path";
+            return"§aPath set to $this->dir";
 		} else {
 			return "§4Directory $path not found !";
 		}
@@ -89,7 +88,7 @@ class Linux extends GitClient {
 		$whereIsCommand = (PHP_OS == 'WINNT') ? 'dir' : 'ls';
 		
 		$process = proc_open(
-		    "$whereIsCommand",
+		    "$whereIsCommand $this->dir",
 		    array(
 		      0 => array("pipe", "r"), //S		TDIN
 		      1 => array("pipe", "w"), //S		TDOUT
@@ -97,7 +96,6 @@ class Linux extends GitClient {
 		    ),
 		    $p
 		  );
-		  chdir(DEFAULT_GIT_DIR);
 		if ($process !== false) {
 			$stdout = stream_get_contents($p[1]);
 			$stderr = stream_get_contents($p[2]);
@@ -106,6 +104,7 @@ class Linux extends GitClient {
 			proc_close($process);
 			
 		}
+		  chdir(DEFAULT_GIT_DIR);
 			return $stdout;
 	}
 
