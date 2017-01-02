@@ -1,4 +1,4 @@
-![Gitable Logo](http://github.com/Ad5001/Gitable/blob/master/git.png)
+![Gitable Logo](https://github.com/Ad5001/Gitable/raw/master/git.png)
 # Gitable
 The git based pocketmine plugin !     
      
