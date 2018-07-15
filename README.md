@@ -1,3 +1,5 @@
+## This repository was moved to [git.ad5001.eu](https://git.ad5001.eu/Ad5001/Gitable)
+https://git.ad5001.eu/Ad5001/Gitable
 <img src="https://github.com/Ad5001/Gitable/raw/master/git.png" width="80px" height="80px"></img>
 # Gitable
 The git based pocketmine plugin !     
